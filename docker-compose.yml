@@ -1,8 +1,39 @@
-version: "3.8"
 services:
+  app:
+    build: .
+    container_name: edtronaut-app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/usr/src/app/src
+      # Mount the Docker socket to allow the app to run Docker commands
+      # This is required for the worker to spawn sandboxed execution containers.
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - ./.env
+
   redis:
     image: redis:alpine
-    mem_limit: 512m
     container_name: edtronaut-redis
     ports:
       - "6379:6379"
+
+  postgres:
+    image: postgres:15
+    container_name: edtronaut-postgres
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
