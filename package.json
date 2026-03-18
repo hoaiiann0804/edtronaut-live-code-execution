@@ -1,0 +1,28 @@
+{
+  "name": "project-interview",
+  "version": "1.0.0",
+  "main": "src/api/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon src/api/server.js",
+    "start": "node src/api/server.js",
+    "worker": "nodemon src/worker/worker.js",
+    "dev:all": "concurrently \"npm run dev\" \"npm run worker\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bull": "^4.16.5",
+    "bullmq": "^5.71.0",
+    "express": "^5.2.1",
+    "ioredis": "^5.10.0",
+    "redis": "^5.11.0",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.14"
+  }
+}

@@ -1,0 +1,21 @@
+# POST http://localhost:3000/code-sessions
+# Content-Type: application/json
+
+# {
+#   "language": "python"
+# }
+
+
+// /code-sessions/{session_id} 
+# PATCH http://localhost:3000/code-sessions/3b7f7c43-7060-425f-aa1d-e27ac9dd0f78
+# Content-Type: application/json
+
+# {
+#   "language": "python",
+#    "source_code": "a = 10\nb = 25\nprint(f'Tổng của {a} và {b} là: {a + b}')"
+# }
+
+# POST http://localhost:3000/code-sessions/3b7f7c43-7060-425f-aa1d-e27ac9dd0f78/run
+
+GET http://localhost:3000/executions/f83c3fab-e58a-4e42-b972-a84fd84acae7
+
