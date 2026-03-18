@@ -1,21 +1,127 @@
-# POST http://localhost:3000/code-sessions
-# Content-Type: application/json
+@baseUrl = http://localhost:3000
 
-# {
-#   "language": "python"
-# }
+# ============================================
+# === TEST CASE FOR PYTHON
+# ============================================
+
+###
+# 1. Create a new code session for Python
+# @name createPySession
+POST {{baseUrl}}/code-sessions
+Content-Type: application/json
+
+{
+  "language": "python"
+}
+
+###
+# Capture the session_id from the Python session response
+@pySessionId = {{createPySession.response.body.session_id}}
+
+###
+# 2. Autosave/update the source code for the Python session
+PATCH {{baseUrl}}/code-sessions/{{pySessionId}}
+Content-Type: application/json
+
+{
+  "source_code": "print('Hello World')"
+}
+
+###
+# 3. Request to run the Python code
+# @name runPyCode
+POST {{baseUrl}}/code-sessions/{{pySessionId}}/run
+
+###
+# Capture the execution_id from the Python run response
+@pyExecutionId = {{runPyCode.response.body.execution_id}}
+
+###
+# 4. Get the Python execution result
+GET {{baseUrl}}/executions/{{pyExecutionId}}
 
 
-// /code-sessions/{session_id} 
-# PATCH http://localhost:3000/code-sessions/3b7f7c43-7060-425f-aa1d-e27ac9dd0f78
-# Content-Type: application/json
+# ============================================
+# === TEST CASE FOR JAVASCRIPT
+# ============================================
 
-# {
-#   "language": "python",
-#    "source_code": "a = 10\nb = 25\nprint(f'Tổng của {a} và {b} là: {a + b}')"
-# }
+###
+# 1. Create a new code session for JavaScript
+# @name createJsSession
+POST {{baseUrl}}/code-sessions
+Content-Type: application/json
 
-# POST http://localhost:3000/code-sessions/3b7f7c43-7060-425f-aa1d-e27ac9dd0f78/run
+{
+  "language": "javascript"
+}
 
-GET http://localhost:3000/executions/f83c3fab-e58a-4e42-b972-a84fd84acae7
+###
+# Capture the session_id from the JavaScript session response
+@jsSessionId = {{createJsSession.response.body.session_id}}
+
+###
+# 2. Autosave/update the source code for the JavaScript session
+PATCH {{baseUrl}}/code-sessions/{{jsSessionId}}
+Content-Type: application/json
+
+{
+  "source_code": "console.log('Hello World');"
+}
+
+###
+# 3. Request to run the JavaScript code
+# @name runJsCode
+POST {{baseUrl}}/code-sessions/{{jsSessionId}}/run
+
+###
+# Capture the execution_id from the JavaScript run response
+@jsExecutionId = {{runJsCode.response.body.execution_id}}
+
+###
+# 4. Get the JavaScript execution result
+GET {{baseUrl}}/executions/{{jsExecutionId}}
+
+
+# ============================================
+# === TEST CASE FOR TIMEOUT (INFINITE LOOP)
+# ============================================
+
+###
+# 1. Create a session for a malicious Python code
+# @name createTimeoutSession
+POST {{baseUrl}}/code-sessions
+Content-Type: application/json
+
+{
+  "language": "python"
+}
+
+###
+# Capture session_id
+@timeoutSessionId = {{createTimeoutSession.response.body.session_id}}
+
+###
+# 2. Autosave with an INFINITE LOOP
+PATCH {{baseUrl}}/code-sessions/{{timeoutSessionId}}
+Content-Type: application/json
+
+{
+  "source_code": "print('Starting infinite loop...')\nwhile True:\n    pass"
+}
+
+###
+# 3. Request to run
+# @name runTimeoutCode
+POST {{baseUrl}}/code-sessions/{{timeoutSessionId}}/run
+
+###
+# Capture execution_id
+@timeoutExecutionId = {{runTimeoutCode.response.body.execution_id}}
+
+###
+# 4. Get the result
+# EXPECTED: At first it will be "RUNNING". 
+# After 5 seconds, hit this again, it should return "TIMEOUT".
+GET {{baseUrl}}/executions/{{timeoutExecutionId}}
+
 
