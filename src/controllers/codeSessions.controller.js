@@ -1,9 +1,24 @@
 const { v4: uuidv4 } = require("uuid");
 const pool = require("../database/pool");
 
+const SUPPORTED_LANGUAGES = ["python", "javascript"];
+
+const isValidUUID = (uuid) => {
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+};
+
 const createSession = async (req, res) => {
-  const sessionId = uuidv4();
   const language = req.body.language || "python";
+
+  if (!SUPPORTED_LANGUAGES.includes(language)) {
+    return res.status(400).json({
+      error: `Unsupported language. Allowed: ${SUPPORTED_LANGUAGES.join(", ")}`,
+    });
+  }
+
+  const sessionId = uuidv4();
 
   try {
     const query = `
@@ -24,6 +39,19 @@ const createSession = async (req, res) => {
 const updateSession = async (req, res) => {
   const { sessionId } = req.params;
   const { language, source_code } = req.body;
+
+  if (!isValidUUID(sessionId)) {
+    return res.status(400).json({ error: "Invalid session_id format" });
+  }
+
+  if (language !== undefined && !SUPPORTED_LANGUAGES.includes(language)) {
+    return res.status(400).json({
+      error: `Unsupported language. Allowed: ${SUPPORTED_LANGUAGES.join(", ")}`,
+    });
+  }
+  if (source_code !== undefined && typeof source_code !== "string") {
+    return res.status(400).json({ error: "source_code must be a string" });
+  }
 
   try {
     const sessionResult = await pool.query(
